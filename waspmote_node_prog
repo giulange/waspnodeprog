@@ -240,7 +240,7 @@ void loop() {
         fnc_message_writeOnSD();
       }
 */
-      if(sequenceNumber%5){
+      if(sequenceNumber%5==0){
         fnc_message_sendFromSD();
       }
 
@@ -1004,9 +1004,11 @@ void fnc_turn_off(){
     RTC.OFF();
     USB.println(                F("  RTC                                [OFF]"));
 // ----SD-
+/*
     // Set SD OFF
     SD.OFF();
     USB.println(                F("  SD                                 [OFF]"));
+*/
 // ----SENS_AGR-          x
     USB.println(F(""));
     SensorAgrv20.setSensorMode(SENS_OFF, SENS_AGR_SENSIRION);
@@ -1043,133 +1045,4 @@ void fnc_turn_on_off_(){
     USB.println(                F("    PLUVIOMETER                      [ON]"));
 // ----turn off all useless stuff
     //...
-}
-
-
-void create_abs_wakeup_time(char *wakeupTime, uint8_t YY, uint8_t MM, uint8_t DD, uint8_t Ho, uint8_t Mi, uint8_t Se ) {
-/** 
- *  (****)See ––> https://www.libelium.com/forum/viewtopic.php?f=28&t=16933&p=51412&hilit=rtc+date+day#p51412
- *
- *  This function creates the absolute time at which measurements must be taken.
- *  The time interval here considered is that of 10 minutes, which means that
- *  exactly every 10 minutes within a hour a new reading starts (in order to have
- *  6 repetitions per hour).
- *  The time passed in input refers to the starting point of the LOOP program and
- *  is given by the list={YY,MM,DD,Ho,Mi,Se}.
- *  The program returns in wakeupTime the absolute time of next reading in format
- *  DD:Ho:Mi:Se.
- *  Note that "Se" passed in input is useless (i.e. it is not used by the program). 
- */
-
-// ----Offset-
-    int LeapYear  = 0;
-    int Ho_offset = 0;
-    int DD_offset = 0;
-    int MM_offset = 0;
-    int YY_offset = 0;
-// ----READ RTC-          write date & time of next 10-min sensors reading:
-    // -date:
-    YY = 2000+YY;
-    USB.print(F("YY: "));
-    USB.println(YY);
-    // -time:
-    Se = 0;//
-    USB.print(F("Se: "));
-    USB.println(Se);
-
-    if(YY%4==0){ LeapYear = 1; }
-    USB.print(F("LeapYear: "));
-    USB.println(LeapYear);
-
-// ----Minute-
-    Mi = (int)Mi/10;
-    USB.print(F("Mi: "));
-    USB.println(Mi);
-
-    switch(Mi){
-      case 0 : // apply case 4
-      case 1 : // apply case 4
-      case 2 : // apply case 4
-      case 3 : // apply case 4
-      case 4 : Mi +=1; break;
-      case 5 : Mi = 0; Ho_offset = 1; break;
-      default: USB.println(F("Error :: Minute config!")); break;
-    }
-    Mi *= 10;
-    USB.print(F("Mi: "));
-    USB.println(Mi);
-
-// ----Hour-
-    Ho += Ho_offset;
-    USB.print(F("Ho: "));
-    USB.println(Ho);
-
-    if(Ho==24){
-      Ho = 0;
-      DD_offset = 1;
-    }
-    USB.print(F("Ho: "));
-    USB.println(Ho);
-
-// ----Day-
-    DD += DD_offset;
-    USB.print(F("DD: "));
-    USB.println(DD);
-
-    switch(MM){
-      // 31
-      case 1 : /*Jan*/
-      case 3 : /*Mar*/
-      case 5 : /*May*/
-      case 7 : /*Jul*/
-      case 8 : /*Aug*/
-      case 10: /*Oct*/
-      case 12: /*Dic*/
-          if(DD==32){
-            DD=1;
-            MM_offset=1;
-          }
-          break;
-      // 30
-      case 4 : /*Apr*/
-      case 6 : /*Jun*/
-      case 9 : /*Sep*/
-      case 11: /*Nov*/
-          if(DD==31){
-            DD=1;
-            MM_offset=1;
-          }
-          break;
-      // 28/29
-      case 2 : /*Feb*/
-          if(DD==29+LeapYear){
-            DD=1;
-            MM_offset=1;
-          }
-          break;
-      // error
-      default : USB.println(F("Error :: Day config!")); break;
-    }
-    USB.print(F("DD: "));
-    USB.println(DD);
-
-// ----Month-             unused!!
-    MM += MM_offset;
-    USB.print(F("MM: "));
-    USB.println(MM);
-
-    if(MM==13){
-      MM = 1;
-      YY_offset = 1;
-    }
-    USB.print(F("MM: "));
-    USB.println(MM);
-
-// ----Year-              unused!!
-    YY += YY_offset;
-    USB.print(F("YY: "));
-    USB.println(YY);
-
-// ----RETURN-
-    sprintf(wakeupTime, "%02d:%02d:%02d:%02d",DD,Ho,Mi,Se);   // DD:Ho:Mi:Se
 }
