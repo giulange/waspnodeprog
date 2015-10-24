@@ -23,126 +23,144 @@
  *  
  */
 
-
-//“”
-
 // **Step 01. LIBRARIES**
-//   Includes of the Sensor Board and Communications modules used
-#include    <WaspSensorAgr_v20.h>
-#include    <WaspGPRS_SIM928A.h>
-#include    <string.h>
+//fnc_load_libs();
+//void fnc_load_libs(){
+  //   Includes of the Sensor Board and Communications modules used
+  #include    <WaspSensorAgr_v20.h>
+  #include    <WaspGPRS_SIM928A.h>
+  #include    <string.h>
+//}
 
 // **Step 02. DEFINITIONS**
+//fnc_declarations();
+//void fnc_declarations(){
 // ---general-
-char    nodeID[10 ]     = "gproc_001";
-char    dataS [100];// data Setup
-char    dataL [100];// data Loop
-char   *dataSD;     // data,line in SD file
-long    sequenceNumber  = 0;
+  char    nodeID[10 ]     = "gproc_001";
+  char    dataS [100];// data Setup
+  char    dataL [100];// data Loop
+  char   *dataSD;     // data,line in SD file
+  long    sequenceNumber  = 0;
+  uint8_t freq_ftp_up     = 10;// ftp upload is performed every MEAS_INTERVAL*freq_ftp_up minutes
 // ---time-
-//                 dd:hh:mm:ss
-char*   sleepTime       = "00:00:00:30";//**
-char*   wakeupTime      = "00:00:00:00";
-char    currDate[11]    = "0000-00-00"; // yyyy-mm-dd
-char    currTime[9]     = "00:00:00";   // HH:MM:SS
-uint8_t YY              = 0;
-uint8_t MM              = 0;
-uint8_t DD              = 0;
-uint8_t Ho              = 0;
-uint8_t Mi              = 0;
-uint8_t Se              = 0;
-long    TIC             = 0;
-long    TOC             = 0;
-uint8_t flElapsed       = 1;
+  //    _______testing______
+  bool    isTest          = false;
+  long    MEAS_INT_TEST   = 80;//SEC
+  //    _____deployment_____
+  long    MEAS_INTERVAL   = 10;//MIN
+  //                         dd:hh:mm:ss
+  //char*   sleepTime     = "00:00:00:10";//**
+  char*   wakeupTime      = "00:00:00:00";
+  char    currDate[11]    = "0000-00-00"; // yyyy-mm-dd
+  char    currTime[9]     = "00:00:00";   // HH:MM:SS
+  uint8_t YY              = 0;
+  uint8_t MM              = 0;
+  uint8_t DD              = 0;
+  uint8_t Ho              = 0;
+  uint8_t Mi              = 0;
+  uint8_t Se              = 0;
+  long    TIC             = 0;
+  long    TOC             = 0;
+  uint8_t flElapsed       = 1;
 // ---sim-        (you must set Internet Provider parameters!!)
-char    apn[11]         = "wap.tim.it";
-char    login[]         = "";
-char    password[]      = "";
-char    pin_code[5]     = "0000"; // (optional)
-int     Ntrials_com     = 0;
-int     Ntrials_com_MAX = 3;
+  char    apn[11]         = "wap.tim.it";
+  char    login[]         = "";
+  char    password[]      = "";
+  char    pin_code[5]     = "0000"; // (optional)
+  int     Ntrials_com     = 0;
+  int     Ntrials_com_MAX = 3;
 // ---remote server-
-#define URL  "http://143.225.214.136/wapp/weathernode_parser.php?"
-#define URL2 "http://52.24.40.172/wapp/weathernode_parser.php?"
-char    IP_address[16]  = "52.24.40.172";
-char    IP_port[6]      = "80";
+  // preprocessor string concatenation
+  #define IP_GPU "143.225.214.136"
+  //char    IP_GPU[16]  = "143.225.214.136";
+  #define IP_AWS "52.24.40.172"
+  //char    IP_AWS[13]  = "52.24.40.172";
+  #define URL  "http://143.225.214.136/wapp/weathernode_parser.php?"
+  //#define URL  "http://" IP_GPU "/wapp/weathernode_parser.php?"
+  #define URL2 "http://52.24.40.172/wapp/weathernode_parser.php?"
+  //#define URL2 "http://" IP_AWS "/wapp/weathernode_parser.php?"
+  /*char    IP_address[16]  = "52.24.40.172";
+  char    IP_port[6]      = "80";*/
 // ---SD-
-char*   unsent_measu    = "uMnew.TXT";// define file name: MUST be 8.3 SHORT FILE NAME
-char*   unsent_measu_old= "uMold.TXT";// define file name: MUST be 8.3 SHORT FILE NAME
+  char*   unsent_measu    = "uMnew.TXT";// define file name: MUST be 8.3 SHORT FILE NAME
+  char*   unsent_measu_old= "uMold.TXT";// define file name: MUST be 8.3 SHORT FILE NAME
 // —--battery-
-int     batteryLevel;
-char    batteryLevelString[10];
-//	  -print:
-char    NODE[3]         = "id";// ---used-->
-char    DATE[5]         = "date";
-char    TIME[5]         = "time";
-char    BATTERY[2]      = "B";
-char    SENSIRION_T[2]  = "T";
-char    RAINFALL[2]     = "R";
-char    SENSIRION_H[3]  = "RH";
-char    LEAFWETNESS[3]  = "LW";
-char    WIND_DIR[3]     = "WD";
-char    WIND_SPEED[3]   = "WS";// <--used---
-char    ACC_X[3]        = "AX";
-char    ACC_Y[3]        = "AY";
-char    ACC_Z[3]        = "AZ";
-char    gpsLatitude[4]  = "LAT";
-char    gpsLongitude[4] = "LON";
-char    gpsAltitude[4]  = "ALT";
+  int     batteryLevel;
+  char    batteryLevelString[10];
+// ---print-
+  char    NODE[3]         = "id";// ---used-->
+  char    DATE[5]         = "date";
+  char    TIME[5]         = "time";
+  char    BATTERY[2]      = "B";
+  char    SENSIRION_T[2]  = "T";
+  char    RAINFALL[2]     = "R";
+  char    SENSIRION_H[3]  = "RH";
+  char    LEAFWETNESS[3]  = "LW";
+  char    WIND_DIR[3]     = "WD";
+  char    WIND_SPEED[3]   = "WS";// <--used---
+  char    ACC_X[3]        = "AX";
+  char    ACC_Y[3]        = "AY";
+  char    ACC_Z[3]        = "AZ";
+  char    gpsLatitude[4]  = "LAT";
+  char    gpsLongitude[4] = "LON";
+  char    gpsAltitude[4]  = "ALT";
 // ---sensors-
-float   digitalTemperature;    
-float   digitalHumidity;         
-char    digitalTemperatureString[10];
-char    digitalHumidityString[10];
-float   anemometer;             
-float   pluviometer;          
-int     vane;
-char    anemometerString[10];
-char    pluviometerString[10];
-char    vaneString[4];
-int     nPulses         = 0;// store the number of pulses in current timeframe
+  float   digitalTemperature;    
+  float   digitalHumidity;         
+  char    digitalTemperatureString[10];
+  char    digitalHumidityString[10];
+  float   anemometer;             
+  float   pluviometer;          
+  int     vane;
+  char    anemometerString[10];
+  char    pluviometerString[10];
+  char    vaneString[4];
+  int     nPulses         = 0;// store the number of pulses in current timeframe
+  int     nPulses_res     = 0;
 // ---position-
-int8_t  x, y;
-int     accelerometerX;
-int     accelerometerY;
-int     accelerometerZ;
-char    accelerometerXString[10];
-char    accelerometerYString[10];
-char    accelerometerZString[10];
+  int8_t  x, y;
+  int     accelerometerX;
+  int     accelerometerY;
+  int     accelerometerZ;
+  char    accelerometerXString[10];
+  char    accelerometerYString[10];
+  char    accelerometerZString[10];
 // ---GPS-
-int8_t  GPS_status      = -2;// -2:error retrieving data!
-int     Ntrials_gps     = 0;
-int     Ntrials_gps_MAX = 20;
-#define TIMEOUT_GPS       30// (240sec = 4minutes)
+  int8_t  GPS_status      = -2;// -2:error retrieving data!
+  int     Ntrials_gps     = 0;
+  int     Ntrials_gps_MAX = 20;
+  #define TIMEOUT_GPS       30// (240sec = 4minutes)
 // ---connectors-
-char    CONNECTOR_A[3]  = "CA";                   
-char    CONNECTOR_B[3]  = "CB";                  
-char    CONNECTOR_C[3]  = "CC";
-char    CONNECTOR_D[3]  = "CD";
-char    CONNECTOR_E[3]  = "CE";
-//     -connectors: {FLOAT,INT,CHAR}
-float   connectorAFloatValue;                  
-float   connectorBFloatValue;              
-float   connectorCFloatValue;            
-float   connectorDFloatValue;     
-float   connectorEFloatValue;
-float   connectorFFloatValue;
-int     connectorAIntValue;
-int     connectorBIntValue;
-int     connectorCIntValue;
-int     connectorDIntValue;
-int     connectorEIntValue;
-int     connectorFIntValue;
-char    connectorAString[10];          
-char    connectorBString[10];          
-char    connectorCString[10];
-char    connectorDString[10];
-char    connectorEString[10];
-char    connectorFString[10];
+  char    CONNECTOR_A[3]  = "CA";                   
+  char    CONNECTOR_B[3]  = "CB";                  
+  char    CONNECTOR_C[3]  = "CC";
+  char    CONNECTOR_D[3]  = "CD";
+  char    CONNECTOR_E[3]  = "CE";
+  //     -connectors: {FLOAT,INT,CHAR}
+  float   connectorAFloatValue;                  
+  float   connectorBFloatValue;              
+  float   connectorCFloatValue;            
+  float   connectorDFloatValue;     
+  float   connectorEFloatValue;
+  float   connectorFFloatValue;
+  int     connectorAIntValue;
+  int     connectorBIntValue;
+  int     connectorCIntValue;
+  int     connectorDIntValue;
+  int     connectorEIntValue;
+  int     connectorFIntValue;
+  char    connectorAString[10];          
+  char    connectorBString[10];          
+  char    connectorCString[10];
+  char    connectorDString[10];
+  char    connectorEString[10];
+  char    connectorFString[10];
 // ---other-
-int8_t  answer;
-bool    status          = false;
-bool    fl_WRITE_SD     = true;
+  int8_t  answer;
+  bool    status          = false;
+  bool    fl_WRITE_SD     = true;
+//}
+
 
 /* 
 length of print:
@@ -152,103 +170,178 @@ length of space on "// ----XXX-" construct:
 //------------------------|
 */
 
-
-
-
 // put your setup code here, to run once:
 void setup() {
 
 // **Step 03. TURN ON**
-    fnc_setup_turn_on();// *ON*  {USB, SD, GPRS_SIM928A, GPS, RTC, SensorAgrv20, SENS_AGR_PLUVIOMETER}
+    fnc_setup_turn_on();// *ON*  {USB, SD, RTC, GPRS_SIM928A, GPS, SensorAgrv20, SENS_AGR_PLUVIOMETER}
 
 // **Step 04. TURN OFF**
-    fnc_setup_turn_off();//*OFF* {SD, (//RTC), (//GPS), (//GPRS_SIM928A)}
+    fnc_setup_turn_off();//*OFF* {SD, RTC, GPS, GPRS_SIM928A}
 
 // **Step 05. MSG::initial**
     // php!! or ftp?
     
 // **Step 06. wakeUpTime**
-    fnc_create_wakeuptime();
+    //fnc_create_wakeuptime();
+    fnc_create_wakeuptime_first();
 
+// **Step 07. Entering Sleep Mode**
+    //fnc_sleep_deep();//  *FNC*      {SensorAgrv20.sleepAgr(wakeupTime,RTC_ABSOLUTE,RTC_ALM1_MODE1,SOCKET0_OFF,SENS_AGR_PLUVIOMETER);}
     USB.println(                F("---------------------------------------------------"));
 }
 
 // put your main code here, to run repeatedly:
 void loop() {
 
-// **Step 07. Entering Sleep Mode**
+// **Step 08. Entering Sleep Mode**
     fnc_sleep_deep();//  *FNC*      {SensorAgrv20.sleepAgr(wakeupTime,RTC_ABSOLUTE,RTC_ALM1_MODE1,SOCKET0_OFF,SENS_AGR_PLUVIOMETER);}
+
+// **Step 09. Print Pulses**
+    if(intFlag & PLV_INT)
+    {
+      fnc_pluviometer_interruption();    
+    }
 
     if(intFlag & RTC_INT)
     {
-// **Step 08. Print Top
-      fnc_print_top();// *OP*       {TIC; sequenceNumber++; }
+// **Step 10. Print Top**
+      fnc_print_top();// *OP*       { TIC; sequenceNumber++; }
 
-// **Step 09. TURN ON**
-      fnc_turn_on();//   *ON*       {SD, (//GPS), (//GPRS_SIM928A), (//SensorAgrv20)
-                    //               SENS_AGR_SENSIRION, SENS_AGR_ANEMOMETER, SENS_AGR_LEAF_WETNESS, ACC}
-                    //   *VAR*      {currDate, currTime}
+// **Step 11. TURN ON**
+      fnc_turn_on();//   *ON*       { RTC, SD, ACC, 
+                    //                SENS_AGR_SENSIRION, SENS_AGR_ANEMOMETER, SENS_AGR_VANE, SENS_AGR_LEAF_WETNESS, 
+                    //                (//GPS), (//GPRS_SIM928A), (//SensorAgrv20), }
+                    //   *VAR*      { currDate, currTime }
 
-// **Step 10. MEASUREMENTS**
-      fnc_measurements();//*VAR*    {DATE, TIME, BATT, TEMP, RAIN, RELHUM, LEAFWET, WINDDIR, WINDSPEED, ACCEL}
+// **Step 12. MEASUREMENTS**
+      fnc_measurements();//*VAR*    { DATE, TIME, BATT, TEMP, RAIN, RELHUM, LEAFWET, WINDDIR, WINDSPEED, ACCEL }
 
-// **Step 11. TURN OFF**
-      fnc_turn_off();//   *OFF*     {(//SensorAgrv20), 
-                     //              SENS_AGR_SENSIRION, SENS_AGR_ANEMOMETER, SENS_AGR_LEAF_WETNESS, ACC}
+// **Step 13. TURN OFF**
+      fnc_turn_off();//  *OFF*      { RTC, SD, ACC, SensorAgrv20, SENS_AGR_PLUVIOMETER, 
+                     //               SENS_AGR_SENSIRION, SENS_AGR_ANEMOMETER, SENS_AGR_VANE, SENS_AGR_LEAF_WETNESS }
 
-// **Step 12. MESSAGE**
-      fnc_message_composition();//  {NODE, DATE, TIME, BATT, TEMP, RAIN, RELHUM, LEAFWET, WINDDIR, WINDSPEED}
+// **Step 14. MESSAGE**
+      fnc_message_composition();//  { NODE, DATE, TIME, BATT, TEMP, RAIN, RELHUM, LEAFWET, WINDDIR, WINDSPEED }
 
-// **Step 13. COMMUNICATION**
-      Ntrials_com = 0;
-      while( fl_WRITE_SD==true & Ntrials_com<Ntrials_com_MAX){
-        fnc_message_send();// *FNC* {GPRS_SIM928A.readURL(URL,  dataL, 1); fnc_message_sendFromSD(); GPRS_SIM928A.OFF}  <–– remove/maintain this URL!!
-      //fnc_message_send();// *FNC* {GPRS_SIM928A.readURL(URL2, dataL, 1); fnc_message_sendFromSD(); GPRS_SIM928A.OFF}  <–– add this URL!!
-      }
+// **Step 15. COMMUNICATION**
+/*
+      //Ntrials_com = 0;
+      //while( fl_WRITE_SD==true & Ntrials_com<Ntrials_com_MAX){
+        fnc_message_send();// *FNC* { GPRS_SIM928A.readURL(URL,  dataL, 1); fnc_message_sendFromSD(); GPRS_SIM928A.OFF }  <–– remove/maintain this URL!!
+      //fnc_message_send();// *FNC* { GPRS_SIM928A.readURL(URL2, dataL, 1); fnc_message_sendFromSD(); GPRS_SIM928A.OFF }  <–– add this URL!!
+      //}
+*/
+      fnc_message_writeOnSD();
 
-// **Step 14. WRITE ON SD**
+// **Step 16. WRITE ON SD**
+/*
       if(fl_WRITE_SD){
         fnc_message_writeOnSD();
       }
+*/
+      if(sequenceNumber%5){
+        fnc_message_sendFromSD();
+      }
 
-// **Step 15. wakeUpTime**
-      fnc_create_wakeuptime();//    {OLD!create_abs_wakeup_time(wakeupTime,YY,MM,DD,Ho,Mi,Se);}
+// **Step 17. Entering Sleep Mode**
+      fnc_print_bottom();//         { SD.OFF; TOC; }
 
-// **Step 16. Entering Sleep Mode**
-      fnc_print_bottom();//         {SD.OFF; TOC; }
+// **Step 18. wakeUpTime**
+      fnc_create_wakeuptime();//    { OLD!create_abs_wakeup_time(wakeupTime,YY,MM,DD,Ho,Mi,Se); }
+
+// **Step 19. OFF the rest**
+      fnc_turn_on_off_();// <––– to complete !!!
+
+// **Step 20. Clear SW/HW interruptions:
+      fnc_interruptions_swhw_clear();
     }
+}
 
-// **Step 17. Clear SW/HW interruptions:
-    fnc_interruptions_swhw_clear();
-
+void fnc_create_wakeuptime_first(){
+//------------------------------|  
+//----------------------------------------------------------------------|
+  USB.println(                  F("  Wakeup Time                        "));
+  RTC.getTime();
+  DD = 0;
+  Ho = 0;
+  Mi = (uint8_t) (RTC.minute + 1)%60;
+  Se = (uint8_t) (RTC.second);
+  sprintf(wakeupTime, "%02d:%02d:%02d:%02d",DD,Ho,Mi,Se);// DD:Ho:Mi:Se
+  USB.print(                    F("    sleep till                       "));
+  USB.println(wakeupTime);
 }
 
 void fnc_create_wakeuptime(){
-// ----Wake Up Time-
-    // Accounts for the residual time till next 10-min timestep
-    //create_abs_wakeup_time(wakeupTime,YY,MM,DD,Ho,Mi,Se);
-    //sprintf(wakeupTime, "%02d:%02d:%02d:%02d",0,0,7,30);   // DD:Ho:Mi:Se
-    wakeupTime = sleepTime;
-    USB.print(                  F("    sleep for                        "));
-    USB.println(wakeupTime);
+  char* P_string="00";
+// ----OLD Absolute-
+  //create_abs_wakeup_time(wakeupTime,YY,MM,DD,Ho,Mi,Se);
+// ----NEW OFFSET-
+  USB.println(                  F("  Wakeup Time                        "));
+  DD = 0;
+  Ho = 0;
+  if(isTest==false){
+// ----Deployment-
+    USB.println(                F("    isTest                           [false]"));
+    // Accounts for the residual time till next MEAS_INTERVAL timestep:
+    long RES = (long)MEAS_INTERVAL * (long)60 * (long)1000 - TOC;//milliseconds
+    //USB.print(F("RES: ")); USB.println(RES);
+    //sprintf(P_string, "%02d",RTC.minute);
+    //USB.print(F("RTC.minute: ")); USB.println(P_string);
+    if(RES <= /*(long)1 * */(long)/*60*/5 * (long)1000){// use a threshold equal to 5 seconds, to save battery
+      USB.println(              F("      toc                            [<5sec]"));
+      //USB.print(F("RES: ")); USB.println(RES);
+      Mi = (uint8_t) (RTC.minute + 6)%60;
+      Se = 0;
+    }
+    else{// compute the effective residual to have 10-min readings!
+      USB.println(              F("      toc                            [>5sec]"));
+      RES /= (long)1000;
+      //USB.print(F("RES: ")); USB.println(RES);
+      // ----Minute-
+      Mi = (uint8_t) ((uint8_t)RTC.minute + (uint8_t)((long)RES/(long)60)) % 60;
+      //sprintf(P_string, "%02d",Mi);
+      //USB.print(F("Mi: ")); USB.println(P_string);
+      Se = (uint8_t) (RTC.second + (uint8_t)(long)RES%(long)60);
+      //sprintf(P_string, "%02d",Se);
+      //USB.print(F("Se: ")); USB.println(P_string);
+      if(Se>=60) Se -= 60; Mi += 1;
+      if(Mi>=60) Mi -= 60;      
+      //sprintf(P_string, "%02d",Mi);
+      //USB.print(F("Mi: ")); USB.println(P_string);        
+      //sprintf(P_string, "%02d",Se);
+      //USB.print(F("Se: ")); USB.println(P_string);
+    }
+  }
+  else if(isTest==true){
+// ----Test-
+    USB.println(                F("    isTest                           [true]"));
+    Mi = (uint8_t)(RTC.minute + (uint8_t)MEAS_INT_TEST/60)%60;
+    Se = (uint8_t)(RTC.second + (uint8_t)MEAS_INT_TEST%60)%60;
+  }
+// ----Print-    
+  sprintf(wakeupTime, "%02d:%02d:%02d:%02d",DD,Ho,Mi,Se);// DD:Ho:Mi:Se
+  USB.print(                    F("      sleep till                     "));
+  USB.println(wakeupTime);
 }
 
 void fnc_sleep_deep(){
 // ----SleepAgr-
-    USB.print(                  F("  Deep Sleep                         "));
-    USB.println(                F("[doing...]"));
-    // The following is not good, because I need to wakeup every 10 min within a hour (6 times!!)
-    //PWR.deepSleep(sleepTime,RTC_OFFSET,RTC_ALM1_MODE1,ALL_OFF);
-    // this one is good if it works:
-    //PWR.deepSleep(wakeupTime,RTC_ABSOLUTE,RTC_ALM1_MODE1,SOCKET0_OFF);// SOCKET0_OFF or ALL_OFF ??
-    // this should work:
-    //SensorAgrv20.sleepAgr(wakeupTime,RTC_ABSOLUTE,RTC_ALM1_MODE1,SOCKET0_OFF,SENS_AGR_PLUVIOMETER);
-    SensorAgrv20.sleepAgr(wakeupTime,RTC_OFFSET,RTC_ALM1_MODE1,SOCKET0_OFF,SENS_AGR_PLUVIOMETER);
+  USB.print(                    F("  Deep Sleep                         "));
+  USB.println(                  F("[doing...]"));
+  // The following is not good, because I need to wakeup every 10 min within a hour (6 times!!)
+  //PWR.deepSleep(sleepTime,RTC_OFFSET,RTC_ALM1_MODE1,ALL_OFF);
+  // this one is good if it works:
+  //PWR.deepSleep(wakeupTime,RTC_ABSOLUTE,RTC_ALM1_MODE1,SOCKET0_OFF);// SOCKET0_OFF or ALL_OFF ??
+  // this should work:
+  SensorAgrv20.sleepAgr(wakeupTime,RTC_ABSOLUTE,RTC_ALM1_MODE4,SOCKET0_OFF,SENS_AGR_PLUVIOMETER);
+  //SensorAgrv20.sleepAgr(wakeupTime,RTC_OFFSET,RTC_ALM1_MODE1,SOCKET0_OFF,SENS_AGR_PLUVIOMETER);
 }
 
 void fnc_measurements(){
 // ----RTC-
-    delay(50);
+    RTC.getTime();
+    delay(10);
     // get Date & Time to fill in MySQL db:
     Se = RTC.second;
     Mi = RTC.minute;
@@ -395,23 +488,14 @@ void fnc_measurements(){
 
 void fnc_pluviometer_read(){
     USB.println(                F("    RAINFALL                         "));
-/*
-     //OLD Sensor pluviometer reading
-    pluviometer = SensorAgrv20.readValue(SENS_AGR_PLUVIOMETER);
-    //Conversion into a string
-    Utils.float2String(pluviometer, pluviometerString, 2);
-    USB.print(                  F("      value                          "));
-    USB.println(pluviometerString);
-*/
-    //NEW Sensor pluviometer reading
-    nPulses = intArray[PLV_POS];
+    //Sensor pluviometer reading
+    nPulses = intArray[PLV_POS];// + hiddenPulses;
     for(int i=0 ; i<nPulses; i++)
     {
-      // Enter pulse information inside class structure
-      //SensorAgrv20.storePulse();
       // decrease number of pulses
       intArray[PLV_POS]--;
     }
+    nPulses_res = intArray[PLV_POS];
     // calculate precipitation (mm) for indicated time period
     pluviometer = nPulses * 0.2794;
     //Conversion into a string
@@ -419,15 +503,28 @@ void fnc_pluviometer_read(){
     USB.print(                  F("      pulses                         "));
     USB.println(nPulses);
     USB.print(                  F("      residual pulses                "));
-    USB.println(intArray[PLV_POS]);
+    USB.println(nPulses_res);
     USB.print(                  F("      value [mm]                     "));
     USB.println(pluviometerString);
 }
 
+void fnc_pluviometer_interruption(){
+  USB.println(F("--------"));  
+  USB.println(                  F("PLV interruption"));
+  USB.print(                    F("  Time:                              "));
+  USB.println( RTC.getTime() );
+  nPulses = intArray[PLV_POS];
+  USB.print(                    F("  Stored Pulses                      "));
+  USB.println( nPulses );
+  // Clear flag
+  intFlag &= ~(PLV_INT);
+  USB.println(F("--------"));
+}
+
 void fnc_message_composition(){
-    //Data payload composition
-    //sprintf(dataL,"I:%s#N:%li#%s:%s#%s:%s#%s:%s#%s:%s#%s:%s#%s:%s#%s:%s#%s:%s#%s:%s#%s:%s#%s:%s#%s:%s#%s:%s#%s:%s\r\n",
-    sprintf(dataL,"%s=%s&%s=%s&%s=%s&%s=%s&%s=%s&%s=%s&%s=%s&%s=%s&%s=%s&%s=%s\r\n",
+  //Data payload composition
+  //sprintf(dataL,"I:%s#N:%li#%s:%s#%s:%s#%s:%s#%s:%s#%s:%s#%s:%s#%s:%s#%s:%s#%s:%s#%s:%s#%s:%s#%s:%s#%s:%s#%s:%s\r\n",
+  sprintf(dataL,"%s=%s&%s=%s&%s=%s&%s=%s&%s=%s&%s=%s&%s=%s&%s=%s&%s=%s&%s=%s\r\n",
 	NODE,              nodeID,
 	DATE,              currDate,
 	TIME,              currTime,
@@ -449,131 +546,170 @@ void fnc_message_composition(){
 }
 
 void fnc_message_send(){
-    fl_WRITE_SD = false;
-    USB.println(                F("  COMMUNICATION                      [START]"));
+  char *STR_1, *STR_2;
+  fl_WRITE_SD = false;
+  USB.println(                F("  COMMUNICATION                      [START]"));
+  // clears the RTC alarm flag to allow the connection with the GPRS_SIM928A module
+  RTC.clearAlarmFlag();
+
 // ----ACTIVATE-          Module GPRS
-    USB.print(                  F("    GPRS_SIM928A                     "));
-    answer = GPRS_SIM928A.ON();
-    if ((answer == 1) || (answer == -3))
-    {
-        USB.println(F("[ON]"));
+  USB.print(                  F("    GPRS_SIM928A                     "));
+  answer = GPRS_SIM928A.ON();
+  if ((answer == 1) || (answer == -3))
+  {
+    USB.println(F("[ON]"));
 // ----CONNECT-           To the Internet
-        USB.print(              F("    CONNECTION                       "));
-        answer = GPRS_SIM928A.check(180);
-        if (answer == 1)
-        {
-            USB.println(F("[OK]"));
+    USB.print(                F("    CONNECTION                       "));
+    answer = GPRS_SIM928A.check(180);
+    if (answer == 1)
+    {
+      USB.println(F("[OK]"));
 // ----CONFIGURE-         GPRS for HTTP, URL with POST
-            USB.print(          F("      URL with POST                  "));
-            answer = GPRS_SIM928A.configureGPRS_HTTP_FTP(1);
-            if (answer == 1)
-            {
-
-                USB.println(F("[OK]"));
-                USB.print(      F("      POST body                      "));
-                USB.println(dataL);
+      USB.print(              F("      URL with POST                  "));
+      answer = GPRS_SIM928A.configureGPRS_HTTP_FTP(1);
+      if (answer == 1)
+      {
+        USB.println(F("[OK]"));
+        USB.print(            F("        POST body                    "));
+        USB.println(dataL);
 // ----SUBMIT POST-       get URL from the solicited URL
-                USB.print(      F("      SENDING DATA...                "));
-                //answer = GPRS_SIM928A.readURL(URL, dataL, 1);
-/*
-                if ( answer == 1)
-                {
+        USB.print(            F("        SENDING DATA...              "));
+        answer = GPRS_SIM928A.readURL(URL, dataL, 1);
+        if ( answer == 1)
+        {
 // ----Done-
-                    USB.println(F("[Done]")); 
-                    USB.print(  F("      Server Reply:                  "));
-                    USB.println(GPRS_SIM928A.buffer_GPRS);                    // shorten php echo!
-                    fnc_message_sendFromSD();
-                }
-
-                else*/ if (answer < -9)
-                {
-// ----Failed #1-
-                    USB.println(F("[Failed #1]"));
-                    USB.print(  F("    Error code:                      "));
-                    USB.println(answer, DEC);
-                    USB.print(  F("    CME error code:                  "));
-                    USB.println(GPRS_SIM928A.CME_CMS_code, DEC);
-                    fl_WRITE_SD=true;
-                }
-                else
-                {
+          USB.println(F("[Done]"));
+          USB.print(          F("        Server Reply:                "));
+          USB.println(GPRS_SIM928A.buffer_GPRS);
+          //fnc_message_sendFromSD();
+/*          
+          // ftp upload is performed every (MEAS_INTERVAL * freq_ftp_up) minutes:
+          if(sequenceNumber%freq_ftp_up==0){
+            sprintf(STR_1,"/%s",unsent_measu); // such as "/uMnew.TXT"
+            sprintf(STR_2,"./%s",unsent_measu);// such as "./uMnew.TXT"
+            answer = GPRS_SIM928A.uploadFile(STR_1, STR_2, "myftp", "myftp", IP_AWS, "21", 1);
+            USB.print(        F("      FTP upload:                    "));
+            // checks the answer
+            if (answer == 1){ USB.println(F("[DONE]")); }
+            else if(answer < -40){
+// ----Failed #1-       FTP
+              USB.println(F("[Failed #1]"));
+              USB.print(      F("        Error code:                  "));
+              USB.println(answer, DEC);
+              USB.print(      F("        CME error code:              "));
+              USB.println(GPRS_SIM928A.CME_CMS_code, DEC);
+            }
+            else {
+// ---Failed #2-        FTP
+              USB.println(F("[Failed #2]"));
+              USB.print(      F("        Error code:                  "));
+              USB.println(answer, DEC);              
+            }
+          }
+*/
+        }
+        else if (answer < -9)
+        {
+// ----Failed #1-       
+          USB.println(F("[Failed #1]"));
+          USB.print(          F("        Error code:                  "));
+          USB.println(answer, DEC);
+          USB.print(          F("        CME error code:              "));
+          USB.println(GPRS_SIM928A.CME_CMS_code, DEC);
+          fl_WRITE_SD=true;
+        }
+        else
+        {
 // ---Failed #2-
-                    USB.println(F("[Failed #2]"));
-                    USB.print(  F("    Error code:                      "));
-                    USB.println(answer, DEC);
-                    fl_WRITE_SD=true;
-                }
-
-            }else{USB.println(F("[Failed]"));fl_WRITE_SD=true;}
-        }else{USB.println(F("[Failed]"));fl_WRITE_SD=true;}
-    }else{USB.println(F("[OFF]"));fl_WRITE_SD=true;}
-    USB.println(                F("  COMMUNICATION                      [END]"));
+          USB.println(F("[Failed #2]"));
+          USB.print(          F("        Error code:                  "));
+          USB.println(answer, DEC);
+          fl_WRITE_SD=true;
+        }
+      }else{USB.println(F("[Failed]"));fl_WRITE_SD=true;}
+    }else{USB.println(F("[Failed]"));fl_WRITE_SD=true;}
+  }else{USB.println(F("[OFF]"));fl_WRITE_SD=true;}
 // ----GPRS OFF-
-    GPRS_SIM928A.OFF();
-    USB.println(                F("    GPRS_SIM928A                     [OFF]"));
+  GPRS_SIM928A.OFF();
+  USB.println(                F("    GPRS_SIM928A                     [OFF]"));
+// ----COMM END-
+  USB.println(                F("  COMMUNICATION                      [END]"));
+  USB.println(F("--------"));
 // ----repeat until MAX-
-    Ntrials_com += 1;
+  Ntrials_com += 1;
 }
+
 
 void fnc_message_writeOnSD(){
     int myCount = 0;
     //...write on SD and decide whether to write also when communication goes fine!!
-    USB.print(                  F("  SD.append                          "));
-    while(myCount<5){
-      if( SD.append(unsent_measu,dataL) ){
-        USB.println( F("[OK]") );
-        break;
-      }else{ myCount += 1; }
-    }
-    USB.println( F("[FAIL]") );
+  USB.print(                  F("  SD.append                          "));
+  while(myCount<5){
+    if( SD.append(unsent_measu,dataL) ){
+      USB.println( F("[OK]") );
+      break;
+    }else{ myCount += 1; }
+  }
+  if(myCount==5) USB.println( F("[FAIL]") );
 }
+
 
 void fnc_message_sendFromSD(){
-    int32_t   Nln_mea   = 0;
-    int32_t   Nln_tmp   = 0;
-    uint32_t  ii        = 0;
-    if( SD.isFile(unsent_measu)==1 & SD.isFile(unsent_measu_old)==1 ){
-      // copy lines from unsent_measu_old to unsent_measu
-      Nln_tmp = SD.numln(unsent_measu_old);
-      if(Nln_tmp!=-1){
-        for(ii=0;ii<Nln_tmp;ii++){
-          SD.append( unsent_measu, SD.catln(unsent_measu_old,ii,1) );
-        }
+  int32_t   Nln_mea   = 0;
+  int32_t   Nln_tmp   = 0;
+  uint32_t  ii        = 0;
+  if( SD.isFile(unsent_measu)==1 & SD.isFile(unsent_measu_old)==1 ){
+    // copy lines from unsent_measu_old to unsent_measu
+    Nln_tmp = SD.numln(unsent_measu_old);
+    if(Nln_tmp!=-1){
+      for(ii=0;ii<Nln_tmp;ii++){
+        SD.append( unsent_measu, SD.catln(unsent_measu_old,ii,1) );
       }
-      // empty unsent_measu_old
-      fnc_sd_file_delete(unsent_measu_old);
-      fnc_sd_file_create(unsent_measu_old);
-      Nln_mea = SD.numln(unsent_measu);
-      if(Nln_mea!=-1){
-        USB.println(            F("      SD                             "));
-        for(ii=0;ii<Nln_mea;ii++){
-          dataSD = SD.catln(unsent_measu,ii,1);
+    }
+    // empty unsent_measu_old
+    //fnc_sd_file_delete(unsent_measu);
+    SD.del(unsent_measu_old);
+    //fnc_sd_file_create(unsent_measu);
+    SD.create(unsent_measu_old);
+    Nln_mea = SD.numln(unsent_measu);
+    USB.print(                F("      Num-lines                      "));
+    USB.println(Nln_mea);
+    if(Nln_mea!=-1){
+      USB.println(            F("      SD                             "));
+      for(ii=0;ii<Nln_mea;ii++){
+        dataSD = SD.catln(unsent_measu,ii,1);
+        USB.print(            F("      POST body                      "));
+        USB.println(dataL);
 // ----SUBMIT POST-       get URL from the solicited URL
-          USB.print(            F("        SENDING LINE                 "));
-          answer = GPRS_SIM928A.readURL(URL, dataSD, 1);
-          if ( answer == 1)
-          {
+        USB.print(            F("        SENDING LINE                 "));
+        answer = GPRS_SIM928A.readURL(URL, dataSD, 1);
+        if ( answer == 1)
+        {
 // ----Done-
-            USB.println(F("[Done]")); 
-            USB.print(          F("      Server Reply:                  "));
-            USB.println(GPRS_SIM928A.buffer_GPRS);                    // shorten php echo!
-            //delete line
-          }
-          else
-          {
-// ----Failed-
-            USB.println(F("[FAIL]"));
-            //store line in OLD file (after to be copied in unsent_measu)
-            SD.append( unsent_measu_old, dataSD);
-          }          
+          USB.println(F("[Done]")); 
+          USB.print(          F("      Server Reply:                  "));
+          USB.println(GPRS_SIM928A.buffer_GPRS);                    // shorten php echo!
+          //delete line
         }
-        //empty unsent_measu
-        fnc_sd_file_delete(unsent_measu);
-        fnc_sd_file_create(unsent_measu);
-      }else{} //print unable to read Nln_mea in file
-    }else{} //print not found message
+        else
+        {
+// ----Failed-
+          USB.println(F("[FAIL]"));
+          //store line in OLD file (after to be copied in unsent_measu)
+          SD.append( unsent_measu_old, dataSD);
+        }          
+      }
+      //empty unsent_measu
+      //fnc_sd_file_delete(&unsent_measu);
+      SD.del(unsent_measu);
+      //fnc_sd_file_create(&unsent_measu);
+      SD.create(unsent_measu);
+    }else{} //print unable to read Nln_mea in file
+  }else{} //print not found message
 }
 
+
+/*
 void fnc_sd_file_create(char* FILENAME){
     USB.print(                  F("    file::"));// "                  "
     USB.print(                  FILENAME);
@@ -583,7 +719,9 @@ void fnc_sd_file_create(char* FILENAME){
       }else{ USB.println(       F("                  [NOT CREATED]") ); }
     }else{ USB.println(         F("                  [EXISTENT]") ); }
 }
+*/
 
+/*
 void fnc_sd_file_delete(char* FILENAME){
     USB.print(                  F("    file::"));// "                  "
     USB.print(                  FILENAME);
@@ -593,7 +731,7 @@ void fnc_sd_file_delete(char* FILENAME){
       }else{ USB.println(       F("                  [NOT DELETED]") ); }
     }else{ USB.println(         F("                  [NOT EXISTENT]") ); }
 }
-
+*/
 
 
 
@@ -602,25 +740,35 @@ void fnc_sd_file_delete(char* FILENAME){
 
 
 void fnc_interruptions_swhw_clear(){
+  /**  Before clearing, I have to store the pulses eventually occurred
+   *   during the MEASUREMENT STAGE.
+   *   But I think that the pin cannot store interruptions while the
+   *   MEASUREMENT STAGE is running.
+   *   In the case in which hiddenPulses can be read somehow, I have to
+   *   add it to the nPulses in Rain Measurement.
+   */
+  int hiddenPulses = intArray[PLV_POS];
+
+  // Clear flag
+  intFlag &= ~(RTC_INT);
+/*
   ///////////////////////////////////////////////////////////////////////
   // A. Clear 'intFlag' 
-  ///////////////////////////////////////////////////////////////////////
   // This is mandatory, if not this interruption will not be deleted and 
   // Waspmote could think in the future that a not existing interruption arrived
   clearIntFlag(); 
 
   ///////////////////////////////////////////////////////////////////////
-  // B. Clear interruption pin   
-  ///////////////////////////////////////////////////////////////////////
+  // B. Clear interruption pin
   // This function is used to make sure the interruption pin is cleared
   // if a non-captured interruption has been produced
   PWR.clearInterruptionPin();
+*/
 }
 
 void fnc_setup_turn_on(){
 // ----USB-               setup for Serial port over USB:
     USB.ON();
-    USB.println("\n\n\n");
     USB.println(                F("---------------------------------------------------"));
     USB.print(                  F("SETUP()                              "));
     USB.println(                nodeID);
@@ -633,15 +781,28 @@ void fnc_setup_turn_on(){
     SD.ON();
     USB.println(                F("  SD                                 [ON]"));
     // create "unsent_measu"
-    fnc_sd_file_create(unsent_measu);
+    //fnc_sd_file_create(unsent_measu);
     // create "unsent_measu_old"
-    fnc_sd_file_create(unsent_measu_old);
+    //fnc_sd_file_create(unsent_measu_old);
+// ----RTC-               turn on, read current time, set GTM times
+    RTC.ON();
+    USB.println(                F("  RTC                                [ON]"));
+    USB.print(                  F("    RTC temperature                  "));
+    USB.println(RTC.getTemperature());
+    USB.print(                  F("    RTC time                         "));
+    USB.println(RTC.getTime());
+  // clears the RTC alarm flag to allow the connection with the GPRS_SIM928A module
+    RTC.clearAlarmFlag();
+    USB.println(                F("    alarm flag cleared               [!]"));
+    delay(300);
 
 // ----GPRS_SIM928A-      close, deactivate & activates the GPRS_SIM928A module
     GPRS_SIM928A.close();// Closes socket
     USB.println(                F("  GPRS_SIM928A module                [CLOSED]"));
+    delay(100);
     GPRS_SIM928A.OFF();// Closes socket and turns it off
     USB.println(                F("  GPRS_SIM928A module                [OFF]"));
+    delay(200);
     answer = GPRS_SIM928A.ON();// default power mode is set to GPRS_PRO_FULL
     if ((answer == 1) || (answer == -3))
     {
@@ -665,6 +826,8 @@ void fnc_setup_turn_on(){
         {
             USB.println(        F("    GPS                              [ON]"));
             USB.print(          F("      waiting satellites             "));
+            USB.println(F("[SKIPPED]"));
+/*            
             while(status==false && Ntrials_gps<Ntrials_gps_MAX)
             {
                 //if(GPRS_SIM928A.getGPSData(1)==1){break;}
@@ -673,8 +836,9 @@ void fnc_setup_turn_on(){
                 status = GPRS_SIM928A.waitForGPSSignal(TIMEOUT_GPS);
                 USB.print(F("*"));
             }
-            USB.print(F("\n"));
+            USB.println(F(""));
             Utils.blinkLEDs(1500);
+*/
             // print GPS status:
             GPS_status = GPRS_SIM928A.getGPSData(1);
             USB.print(          F("      read data from satellites      "));
@@ -706,17 +870,10 @@ void fnc_setup_turn_on(){
     }
     else // Problem with the communication with the GPRS_SIM928A module
     {
-        USB.println(            F("  GPRS_SIM928A module                [OFF]"));
+        USB.println(            F("  GPRS_SIM928A module                [NOT READY]"));
         sprintf(dataS, "%s%s=%s&", dataS,"GPRS_SIM928A.module","OFF");
-	}
+    }
 
-// ----RTC-               turn on, read current time, set GTM times
-    RTC.ON();
-    USB.println(                F("  RTC                                [ON]"));
-    USB.print(                  F("    RTC temperature                  "));
-    USB.println(RTC.getTemperature());
-    USB.print(                  F("    RTC time                         "));
-    USB.println(RTC.getTime());
     if( GPS_status == 1 )
     {   //Sets time and date to the RTC from the GPS engine (GMT time)
         USB.print(              F("    GMT time (from GPS engine)       "));
@@ -724,16 +881,12 @@ void fnc_setup_turn_on(){
         //Utils.blinkLEDs(1000);
         //USB.println(RTC.getTime());
         USB.println(F("[SKIPPED]"));
-	}
+    }
     else
-	{
+	  {
         USB.println(            F("    GMT time (from GPS engine)       [-]"));
         sprintf(dataS, "%s%s=%s&", dataS,"time(RTC<--GTM)","IMPOSSIBLE");
-	}
-	// clears the RTC alarm flag to allow the connection with the GPRS_SIM928A module
-    RTC.clearAlarmFlag();
-    USB.println(                F("    alarm flag cleared               [!]"));
-
+	  }
 // ——AGRV20-               turn on, turn on PLUVIOMETER
     SensorAgrv20.ON();
     USB.println(                F("  Agrv20                             [ON]"));// LEAVE ALWAYS ON
@@ -742,21 +895,22 @@ void fnc_setup_turn_on(){
 }
 
 void fnc_setup_turn_off(){
+// ----SD-      c
     SD.OFF();
     USB.println(                F("  SD                                 [OFF]"));
-/*
+// ----RTC-     c
     RTC.OFF();
     USB.println(                F("  RTC                                [OFF]"));
-
+// ----GPS-     c
     if (GPRS_SIM928A.GPS_OFF() == 1)
     {
         USB.println(            F("  GPS                                [OFF]"));
     }
+// ----SIM928A- c
     GPRS_SIM928A.close();// Closes socket
     USB.println(                F("  GPRS_SIM928A module                [CLOSED]"));// maybe YES, or something similar!!
     GPRS_SIM928A.OFF();// Closes socket and turns it off
     USB.println(                F("  GPRS_SIM928A module                [OFF]"));   // surely NO, so loop is faster!!
-*/
 }
 
 void fnc_print_top(){
@@ -764,7 +918,7 @@ void fnc_print_top(){
     flElapsed = 1; // reset the flag for elapsed time as good based upon the TOC-TIC difference.
     //Increase the sequence number after wake up
     sequenceNumber++;
-    USB.println("\n");
+    USB.println("");
     USB.println(                F("---------------------------------------------------"));	
     USB.print(                  F("LOOP( "));
     USB.print(                  sequenceNumber);
@@ -785,10 +939,10 @@ void fnc_print_bottom(){
     USB.println();
     switch(flElapsed){
       case 0 :
-          USB.print(       F("Elapsed Time ERROR:                  "));
+          USB.print(            F("Elapsed Time (ERROR):                "));
           break;
       case 1 :
-          USB.print(       F("Elapsed Time FINE:                   "));
+          USB.print(            F("Elapsed Time (FINE):                 "));
           break;
     }
     USB.println(TOC);
@@ -796,62 +950,101 @@ void fnc_print_bottom(){
 }
 
 void fnc_turn_on(){
+    USB.println(F(""));
+    USB.println(                F("Turning ON..."));
+// ----RTC-               turn on, read current time, set GTM times
+    RTC.ON();
+    USB.println(                F("  RTC                                [ON]"));
+    delay(50);
+  // clears the RTC alarm flag to allow the connection with the GPRS_SIM928A module
+    RTC.clearAlarmFlag();
+    USB.println(                F("    alarm flag cleared               [!]"));
+    delay(300);
 // ----SD-
     // Set SD ON
     SD.ON();
     USB.println(                F("  SD                                 [ON]"));
+    delay(50);
 // ----GPS-               unsure to maintain this piece of code as it takes long time to finish!!
-    /*
+/*
     GPRS_SIM928A.GPS_ON();
     // waiting for GPS is connected to satellites (240 seconds)
     GPS_status = GPRS_SIM928A.waitForGPSSignal(TIMEOUT_GPS);
     //supply stabilization delay
     delay(100);
-    */
+*/
+
 // ----SENSOR BOARD-
 /*
     SensorAgrv20.ON();
     USB.println(                F("  Agrv20                             [ON]")); // LEAVED ALWAYS ON!!
 */
 // ----SENSORS-           x
-    SensorAgrv20.setSensorMode(SENS_ON, SENS_AGR_SENSIRION);
+    USB.print(F(""));
+    USB.println(                F("  Agrv20                             "));
+    SensorAgrv20.setSensorMode(SENS_ON, SENS_AGR_SENSIRION);    delay(10000);
     USB.println(                F("    SENSIRION                        [ON]"));
-    delay(10000);
-    SensorAgrv20.setSensorMode(SENS_ON, SENS_AGR_ANEMOMETER);
-    USB.println(                F("    ANEMOMETER                       [ON]")); // ADD PLUVIO ON !!
-    delay(100);
-    SensorAgrv20.setSensorMode(SENS_ON, SENS_AGR_LEAF_WETNESS);
+    SensorAgrv20.setSensorMode(SENS_ON, SENS_AGR_ANEMOMETER);   delay(10);
+    USB.println(                F("    ANEMOMETER                       [ON]"));
+    SensorAgrv20.setSensorMode(SENS_ON, SENS_AGR_VANE);         delay(10);
+    USB.println(                F("    VANE                             [ON]"));
+    SensorAgrv20.setSensorMode(SENS_ON, SENS_AGR_LEAF_WETNESS); delay(100);
     USB.println(                F("    LEAF_WETNESS                     [ON]"));
-    delay(100);
+    USB.println(F(""));
 // ----ACCELEROMETER-     x
     ACC.ON();
     USB.println(                F("  ACC                                [ON]"));
-
+    USB.println(F("--------"));
 }
 
 void fnc_turn_off(){
-/*
+    USB.println(F(""));
+    USB.println(                F("Turning OFF..."));
+// ----RTC-
+    RTC.OFF();
+    USB.println(                F("  RTC                                [OFF]"));
 // ----SD-
     // Set SD OFF
     SD.OFF();
     USB.println(                F("  SD                                 [OFF]"));
-*/
 // ----SENS_AGR-          x
+    USB.println(F(""));
     SensorAgrv20.setSensorMode(SENS_OFF, SENS_AGR_SENSIRION);
-    USB.println(                F("  SENSIRION                          [OFF]"));
+    USB.println(                F("    SENSIRION                        [OFF]"));
     SensorAgrv20.setSensorMode(SENS_OFF, SENS_AGR_ANEMOMETER);
-    USB.println(                F("  ANEMOMETER                         [OFF]"));
+    USB.println(                F("    ANEMOMETER                       [OFF]"));
+    SensorAgrv20.setSensorMode(SENS_OFF, SENS_AGR_VANE);
+    USB.println(                F("    VANE                             [OFF]"));
     SensorAgrv20.setSensorMode(SENS_OFF, SENS_AGR_LEAF_WETNESS);
-    USB.println(                F("  LEAF_WETNESS                       [OFF]"));
+    USB.println(                F("    LEAF_WETNESS                     [OFF]"));
+    SensorAgrv20.setSensorMode(SENS_OFF, SENS_AGR_PLUVIOMETER);
+    USB.println(                F("    PLUVIOMETER                      [OFF]"));
+    SensorAgrv20.OFF();// <––– required to avoid interference during communication
+    USB.println(                F("  Agrv20                             [OFF]"));// LEAVE ALWAYS ON
+    USB.println(F(""));
 /*
-    SensorAgrv20.OFF();
-    USB.println(                F("  Agrv20                             [OFF]")); // LEAVE ON for PLUVIO!!
+    if (GPRS_SIM928A.GPS_OFF() == 1)
+    {
+      USB.println(F(""));  
+      USB.println(              F("  GPS                                [OFF]"));
+    }
 */
 // ----ACCELEROMETER-     x
     ACC.OFF();
     USB.println(                F("  ACC                                [OFF]"));
-
+    USB.println(F("--------"));
 }
+
+void fnc_turn_on_off_(){
+// ----AGRV20-               turn on, turn on PLUVIOMETER
+    SensorAgrv20.ON();
+    USB.println(                F("  Agrv20                             [ON]"));// LEAVE ALWAYS ON
+    SensorAgrv20.setSensorMode(SENS_ON, SENS_AGR_PLUVIOMETER);
+    USB.println(                F("    PLUVIOMETER                      [ON]"));
+// ----turn off all useless stuff
+    //...
+}
+
 
 void create_abs_wakeup_time(char *wakeupTime, uint8_t YY, uint8_t MM, uint8_t DD, uint8_t Ho, uint8_t Mi, uint8_t Se ) {
 /** 
@@ -889,7 +1082,7 @@ void create_abs_wakeup_time(char *wakeupTime, uint8_t YY, uint8_t MM, uint8_t DD
     USB.println(LeapYear);
 
 // ----Minute-
-    Mi = (int)Mi%10;
+    Mi = (int)Mi/10;
     USB.print(F("Mi: "));
     USB.println(Mi);
 
